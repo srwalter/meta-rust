@@ -295,7 +295,6 @@ do_configure () {
         # - submodule management is done by bitbake's fetching
 	${S}/configure					\
 		"--enable-rpath"			\
-		"--disable-verify-install"		\
 		"--disable-docs"			\
 		"--disable-manage-submodules"           \
 		"--disable-debug"			\

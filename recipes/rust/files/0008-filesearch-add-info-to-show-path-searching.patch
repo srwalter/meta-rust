@@ -1,14 +1,14 @@
-From c43717223b5f1ddec0a35d32ff7065e1be2efe8f Mon Sep 17 00:00:00 2001
+From 330ac959067d874b5e07f7ff5d8da82a633321bc Mon Sep 17 00:00:00 2001
 From: Cody P Schafer <dev@codyps.com>
 Date: Mon, 9 Mar 2015 16:33:27 -0400
-Subject: [PATCH 12/13] filesearch: add info! to show path searching
+Subject: [PATCH 8/8] filesearch: add info! to show path searching
 
 ---
  src/librustc/metadata/filesearch.rs | 3 +++
  1 file changed, 3 insertions(+)
 
 diff --git a/src/librustc/metadata/filesearch.rs b/src/librustc/metadata/filesearch.rs
-index 2e1e89c..30800fe 100644
+index 67c530b..d43619e 100644
 --- a/src/librustc/metadata/filesearch.rs
 +++ b/src/librustc/metadata/filesearch.rs
 @@ -46,6 +46,7 @@ impl<'a> FileSearch<'a> {
@@ -27,7 +27,7 @@ index 2e1e89c..30800fe 100644
              match f(&tlib_path, PathKind::All) {
                  FileMatches => found = true,
                  FileDoesntMatch => ()
-@@ -76,6 +78,7 @@ impl<'a> FileSearch<'a> {
+@@ -77,6 +79,7 @@ impl<'a> FileSearch<'a> {
                      visited_dirs.insert(tlib_path.clone());
                      // Don't keep searching the RUST_PATH if one match turns up --
                      // if we did, we'd get a "multiple matching crates" error

@@ -1,14 +1,14 @@
-From de79cd1ff3d936f576460b91142c9b0074657fab Mon Sep 17 00:00:00 2001
+From c38dd4a970218851dfe3f08712fca0e01def787f Mon Sep 17 00:00:00 2001
 From: Cody P Schafer <dev@codyps.com>
 Date: Wed, 3 Dec 2014 19:15:19 -0500
-Subject: [PATCH 09/13] std/thread_local: workaround for NULL __dso_handle
+Subject: [PATCH 5/8] std/thread_local: workaround for NULL __dso_handle
 
 ---
  src/libstd/thread/local.rs | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/libstd/thread/local.rs b/src/libstd/thread/local.rs
-index acd6970..547a8e4 100644
+index 226c7be..3095ec1 100644
 --- a/src/libstd/thread/local.rs
 +++ b/src/libstd/thread/local.rs
 @@ -368,7 +368,7 @@ mod imp {

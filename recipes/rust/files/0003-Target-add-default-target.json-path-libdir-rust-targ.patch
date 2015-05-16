@@ -1,7 +1,7 @@
-From 5bc80655c7588d11c36505013d935e802a75332c Mon Sep 17 00:00:00 2001
+From 7363525da1abfcf7c0a66b3bc7733bf345105b75 Mon Sep 17 00:00:00 2001
 From: Cody P Schafer <dev@codyps.com>
 Date: Tue, 18 Nov 2014 01:40:21 -0500
-Subject: [PATCH 04/13] Target: add default target.json path:
+Subject: [PATCH 3/8] Target: add default target.json path:
  $libdir/rust/targets
 
 ---
@@ -11,7 +11,7 @@ Subject: [PATCH 04/13] Target: add default target.json path:
  3 files changed, 21 insertions(+), 9 deletions(-)
 
 diff --git a/src/librustc/session/config.rs b/src/librustc/session/config.rs
-index a7d608d..83b3cd2 100644
+index 3fb6c19..af4d604 100644
 --- a/src/librustc/session/config.rs
 +++ b/src/librustc/session/config.rs
 @@ -37,7 +37,7 @@ use getopts;
@@ -40,10 +40,10 @@ index a7d608d..83b3cd2 100644
  
      let (int_type, uint_type) = match &target.target_pointer_width[..] {
 diff --git a/src/librustc/session/mod.rs b/src/librustc/session/mod.rs
-index 3e3e5e1..3a1b31f 100644
+index 500af5f..a4e84ae 100644
 --- a/src/librustc/session/mod.rs
 +++ b/src/librustc/session/mod.rs
-@@ -346,14 +346,18 @@ pub fn build_session_(sopts: config::Options,
+@@ -354,14 +354,18 @@ pub fn build_session_(sopts: config::Options,
                        local_crate_source_file: Option<PathBuf>,
                        span_diagnostic: diagnostic::SpanHandler)
                        -> Session {

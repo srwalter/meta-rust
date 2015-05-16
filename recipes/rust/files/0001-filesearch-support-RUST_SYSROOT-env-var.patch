@@ -1,17 +1,17 @@
-From d50ede97690f2814d2e56d3a644a490ef95cde4c Mon Sep 17 00:00:00 2001
+From ce74dd1c86cb2a6ad1954cda03d37840964d3451 Mon Sep 17 00:00:00 2001
 From: Steven Walter <swalter@lexmark.com>
 Date: Tue, 28 Apr 2015 11:24:29 -0400
-Subject: [PATCH] filesearch: support RUST_SYSROOT env var
+Subject: [PATCH 1/8] filesearch: support RUST_SYSROOT env var
 
 ---
  src/librustc/metadata/filesearch.rs | 5 +++++
  1 file changed, 5 insertions(+)
 
 diff --git a/src/librustc/metadata/filesearch.rs b/src/librustc/metadata/filesearch.rs
-index 81b2327..d43619e 100644
+index 1567f4b..67c530b 100644
 --- a/src/librustc/metadata/filesearch.rs
 +++ b/src/librustc/metadata/filesearch.rs
-@@ -201,6 +201,11 @@ pub fn get_or_default_sysroot() -> PathBuf {
+@@ -198,6 +198,11 @@ pub fn get_or_default_sysroot() -> PathBuf {
          })
      }
  
