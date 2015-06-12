@@ -1,5 +1,8 @@
 inherit rust
 
+RUSTLIB_DEP ?= " rustlib"
+DEPENDS .= "${RUSTLIB_DEP}"
+
 export rustlibdir = "${libdir}/rust"
 FILES_${PN} += "${rustlibdir}/*.so"
 FILES_${PN}-dbg += "${rustlibdir}/.debug"

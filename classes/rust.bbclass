@@ -8,7 +8,7 @@ def rust_base_dep(d):
     deps = ""
     if not d.getVar('INHIBIT_DEFAULT_RUST_DEPS'):
         if (d.getVar('HOST_SYS', True) != d.getVar('BUILD_SYS', True)):
-            deps += " virtual/${TARGET_PREFIX}rust rustlib"
+            deps += " virtual/${TARGET_PREFIX}rust"
         else:
             deps += " rust-native"
     return deps

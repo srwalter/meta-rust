@@ -5,8 +5,8 @@ LICENSE = "MIT | Apache-2.0"
 
 inherit rust-bin
 
-INHIBIT_DEFAULT_RUST_DEPS = "1"
 DEPENDS += "virtual/${TARGET_PREFIX}rust"
+RUSTLIB_DEP = ""
 
 rustlib="${libdir}/${TUNE_PKGARCH}${TARGET_VENDOR}-${TARGET_OS}/rustlib/${HOST_SYS}/lib"
 
