@@ -3,7 +3,7 @@ HOMEPAGE = "http://www.rust-lang.org"
 SECTION = "devel"
 LICENSE = "MIT | Apache-2.0"
 
-inherit rust
+inherit rust-bin
 
 INHIBIT_DEFAULT_RUST_DEPS = "1"
 DEPENDS += "virtual/${TARGET_PREFIX}rust"
