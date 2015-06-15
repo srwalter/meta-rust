@@ -27,4 +27,4 @@ do_rust_bin_fixups() {
     done
 }
 
-PACKAGEBUILDPKGD_append = "do_rust_bin_fixups"
+PACKAGE_PREPROCESS_FUNCS += "do_rust_bin_fixups"
