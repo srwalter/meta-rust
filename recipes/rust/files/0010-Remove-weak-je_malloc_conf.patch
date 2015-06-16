@@ -1,0 +1,53 @@
+From d8bd350fa0c4bf636649a241258770ddcd9314df Mon Sep 17 00:00:00 2001
+From: Tyler Hall <tyhall@lexmark.com>
+Date: Tue, 16 Jun 2015 12:00:21 -0400
+Subject: [PATCH] Remove weak je_malloc_conf.
+
+Prelinking breaks because this is in BSS
+---
+ src/jemalloc/configure.ac                          | 2 +-
+ src/jemalloc/src/jemalloc/include/jemalloc/jemalloc_protos.h.in | 1 -
+ src/jemalloc/src/jemalloc.c                        | 2 +-
+ 3 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/jemalloc/configure.ac b/src/jemalloc/configure.ac
+index fd7554d..68898a7 100644
+--- a/src/jemalloc/configure.ac
++++ b/src/jemalloc/configure.ac
+@@ -457,7 +457,7 @@ AC_PROG_RANLIB
+ AC_PATH_PROG([LD], [ld], [false], [$PATH])
+ AC_PATH_PROG([AUTOCONF], [autoconf], [false], [$PATH])
+ 
+-public_syms="malloc_conf malloc_message malloc calloc posix_memalign aligned_alloc realloc free mallocx rallocx xallocx sallocx dallocx sdallocx nallocx mallctl mallctlnametomib mallctlbymib malloc_stats_print malloc_usable_size"
++public_syms="malloc_message malloc calloc posix_memalign aligned_alloc realloc free mallocx rallocx xallocx sallocx dallocx sdallocx nallocx mallctl mallctlnametomib mallctlbymib malloc_stats_print malloc_usable_size"
+ 
+ dnl Check for allocator-related functions that should be wrapped.
+ AC_CHECK_FUNC([memalign],
+diff --git a/src/jemalloc/include/jemalloc/jemalloc_protos.h.in b/src/jemalloc/include/jemalloc/jemalloc_protos.h.in
+index f81adc1..438f432 100644
+--- a/src/jemalloc/include/jemalloc/jemalloc_protos.h.in
++++ b/src/jemalloc/include/jemalloc/jemalloc_protos.h.in
+@@ -3,7 +3,6 @@
+  * of namespace management, and should be omitted in application code unless
+  * JEMALLOC_NO_DEMANGLE is defined (see jemalloc_mangle@install_suffix@.h).
+  */
+-extern JEMALLOC_EXPORT const char	*@je_@malloc_conf;
+ extern JEMALLOC_EXPORT void		(*@je_@malloc_message)(void *cbopaque,
+     const char *s);
+ 
+diff --git a/src/jemalloc/src/jemalloc.c b/src/jemalloc/src/jemalloc.c
+index 3490ecd..e84f692 100644
+--- a/src/jemalloc/src/jemalloc.c
++++ b/src/jemalloc/src/jemalloc.c
+@@ -7,7 +7,7 @@
+ malloc_tsd_data(, arenas, arena_t *, NULL)
+ 
+ /* Runtime configuration options. */
+-const char	*je_malloc_conf JEMALLOC_ATTR(weak);
++static const char	*je_malloc_conf;
+ bool	opt_abort =
+ #ifdef JEMALLOC_DEBUG
+     true
+-- 
+2.4.2
+

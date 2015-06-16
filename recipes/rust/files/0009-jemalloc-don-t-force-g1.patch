@@ -1,0 +1,27 @@
+From 3e643903d3f31f326e07d1f1d99cd56a17c1f55b Mon Sep 17 00:00:00 2001
+From: Tyler Hall <tyhall@lexmark.com>
+Date: Mon, 15 Jun 2015 15:08:06 -0400
+Subject: [PATCH] jemalloc: don't force -g1
+
+Jemalloc already tests for -g3. It is convenient to have line
+information.
+---
+ mk/rt.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mk/rt.mk b/mk/rt.mk
+index 1324e08..13b70bb 100644
+--- a/mk/rt.mk
++++ b/mk/rt.mk
+@@ -184,7 +184,7 @@ $$(JEMALLOC_LOCAL_$(1)): $$(JEMALLOC_DEPS) $$(MKFILE_DEPS)
+ 		AR="$$(AR_$(1))" \
+ 		RANLIB="$$(AR_$(1)) s" \
+ 		CPPFLAGS="-I $(S)src/rt/" \
+-		EXTRA_CFLAGS="-g1 -ffunction-sections -fdata-sections"
++		EXTRA_CFLAGS="-ffunction-sections -fdata-sections"
+ 	$$(Q)$$(P)$$(MAKE) -C "$$(JEMALLOC_BUILD_DIR_$(1))" build_lib_static
+ 
+ ifeq ($$(CFG_DISABLE_JEMALLOC),)
+-- 
+2.4.2
+
