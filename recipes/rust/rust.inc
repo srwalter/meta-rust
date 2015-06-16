@@ -298,6 +298,7 @@ do_configure () {
 		"--disable-docs"			\
 		"--disable-manage-submodules"           \
 		"--disable-debug"			\
+		"--enable-debuginfo"			\
                 "--disable-ldconfig"                    \
 		"--enable-optimize"			\
 		"--enable-optimize-cxx"			\
