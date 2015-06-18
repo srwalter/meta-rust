@@ -14,6 +14,7 @@ SRC_URI_append = "\
 	file://0009-jemalloc-don-t-force-g1.patch \
 	file://0010-Remove-weak-je_malloc_conf.patch \
 	file://0001-src-rt-arch-i386-morestack.S-call-rust_stack_exhaust.patch \
+	file://0001-sth-is-pants.patch \
 \
 	file://rust-installer/0001-add-option-to-disable-rewriting-of-install-paths.patch;patchdir=src/rust-installer \
 "
