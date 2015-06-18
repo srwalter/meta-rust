@@ -1,0 +1,80 @@
+From 40c2ea9c8e6ed466ecc6fabd80f10cc1678aa02a Mon Sep 17 00:00:00 2001
+From: Steven Walter <stevenrwalter@gmail.com>
+Date: Tue, 30 Jun 2015 21:18:48 -0400
+Subject: [PATCH] disable symbol hashing
+
+---
+ src/librustc_trans/back/link.rs | 30 +++++++-----------------------
+ 1 file changed, 7 insertions(+), 23 deletions(-)
+
+diff --git a/src/librustc_trans/back/link.rs b/src/librustc_trans/back/link.rs
+index 2f2ba16..8d4f27d 100644
+--- a/src/librustc_trans/back/link.rs
++++ b/src/librustc_trans/back/link.rs
+@@ -19,13 +19,13 @@ use session::config::{OutputFilenames, Input, OutputTypeBitcode, OutputTypeExe,
+ use session::search_paths::PathKind;
+ use session::Session;
+ use metadata::common::LinkMeta;
+-use metadata::{encoder, cstore, filesearch, csearch, creader};
++use metadata::{cstore, filesearch, csearch, creader};
+ use metadata::filesearch::FileDoesntMatch;
+ use trans::{CrateContext, CrateTranslation, gensym_name};
+ use middle::ty::{self, Ty};
+ use util::common::time;
+ use util::ppaux;
+-use util::sha2::{Digest, Sha256};
++use util::sha2::{Sha256};
+ use util::fs::fix_windows_verbatim_for_gcc;
+ use rustc_back::tempdir::TempDir;
+ 
+@@ -37,7 +37,6 @@ use std::path::{Path, PathBuf};
+ use std::process::Command;
+ use std::str;
+ use flate;
+-use serialize::hex::ToHex;
+ use syntax::ast;
+ use syntax::ast_map::{PathElem, PathElems, PathName};
+ use syntax::attr::AttrMetaMethods;
+@@ -185,34 +184,19 @@ pub fn build_link_meta(sess: &Session, krate: &ast::Crate,
+     return r;
+ }
+ 
+-fn truncated_hash_result(symbol_hasher: &mut Sha256) -> String {
+-    let output = symbol_hasher.result_bytes();
+-    // 64 bits should be enough to avoid collisions.
+-    output[.. 8].to_hex().to_string()
+-}
+ 
+ 
+ // This calculates STH for a symbol, as defined above
+-fn symbol_hash<'tcx>(tcx: &ty::ctxt<'tcx>,
+-                     symbol_hasher: &mut Sha256,
+-                     t: Ty<'tcx>,
+-                     link_meta: &LinkMeta)
++fn symbol_hash<'tcx>(_tcx: &ty::ctxt<'tcx>,
++                     _symbol_hasher: &mut Sha256,
++                     _t: Ty<'tcx>,
++                     _link_meta: &LinkMeta)
+                      -> String {
+     // NB: do *not* use abbrevs here as we want the symbol names
+     // to be independent of one another in the crate.
+ 
+-    symbol_hasher.reset();
+-    symbol_hasher.input_str(&link_meta.crate_name);
+-    symbol_hasher.input_str("-");
+-    symbol_hasher.input_str(link_meta.crate_hash.as_str());
+-    for meta in &*tcx.sess.crate_metadata.borrow() {
+-        symbol_hasher.input_str(&meta[..]);
+-    }
+-    symbol_hasher.input_str("-");
+-    symbol_hasher.input_str(&encoder::encoded_ty(tcx, t));
+     // Prefix with 'h' so that it never blends into adjacent digits
+-    let mut hash = String::from_str("h");
+-    hash.push_str(&truncated_hash_result(symbol_hasher));
++    let hash = String::from_str("STHisPANTS");
+     hash
+ }
+ 
+-- 
+2.1.4
+
