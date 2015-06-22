@@ -14,6 +14,7 @@ inherit native
 
 EXTRA_OECONF += "--enable-targets=x86,x86_64,arm,aarch64,mips,powerpc"
 EXTRA_OECONF += "--enable-optimized"
+EXTRA_OECONF += "--disable-bindings"
 
 do_install_append () {
 	cd ${D}${bindir}
