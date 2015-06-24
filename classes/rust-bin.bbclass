@@ -6,6 +6,7 @@ DEPENDS += "patchelf-native"
 
 export rustlibdir = "${libdir}/rust"
 FILES_${PN} += "${rustlibdir}/*.so"
+FILES_${PN}-dev += "${rustlibdir}/*.rlib"
 FILES_${PN}-dbg += "${rustlibdir}/.debug"
 
 RUSTC_ARCHFLAGS += "-C opt-level=3 -L ${STAGING_DIR_HOST}/${rustlibdir}"
