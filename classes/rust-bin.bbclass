@@ -15,6 +15,10 @@ EXTRA_OEMAKE += 'RUSTC_ARCHFLAGS="${RUSTC_ARCHFLAGS}"'
 LIBC_FLAGS ?= "${@base_contains('DEPENDS', 'libc-rs', '--extern libc=${STAGING_DIR_HOST}/${rustlibdir}/liblibc.rlib', '', d)}"
 RUSTC_FLAGS += "${LIBC_FLAGS}"
 
+# Prevents multiple static copies of standard library modules
+# See https://github.com/rust-lang/rust/issues/19680
+RUSTC_FLAGS += "-C prefer-dynamic"
+
 rustlib="${libdir}/${TUNE_PKGARCH}${TARGET_VENDOR}-${TARGET_OS}/rustlib/${HOST_SYS}/lib"
 CRATE_NAME ?= "${@d.getVar('BPN', True).replace('-rs', '').replace('-', '_')}"
 LIBNAME ?= "lib${CRATE_NAME}"
