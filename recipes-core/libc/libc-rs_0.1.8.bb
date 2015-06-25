@@ -15,10 +15,14 @@ SRCREV = "8b7c17db2235a2a3f2c71242b11fc429a8d05a90"
 
 S = "${WORKDIR}/git"
 
+# This defeats the "only use the version from crates.io" check
+RUSTC_FLAGS += "--cfg feature='"cargo-build"'"
+LIB_SRC = "${S}/src/liblibc/lib.rs"
+
 do_compile () {
-	oe_runrustc ${S}/src/liblibc/lib.rs --cfg feature='"cargo-build"'
+	oe_compile_rust_lib
 }
 
 do_install () {
-	install -D -m 644 liblibc.rlib ${D}/${rustlibdir}/liblibc.rlib
+	oe_install_rust_lib
 }
