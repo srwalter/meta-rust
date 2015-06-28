@@ -12,7 +12,7 @@ SRC_URI_append = "\
 	file://0007-mk-install-use-disable-rewrite-paths.patch \
 	file://0008-filesearch-add-info-to-show-path-searching.patch \
 	file://0009-jemalloc-don-t-force-g1.patch \
-	file://0010-Remove-weak-je_malloc_conf.patch \
+	file://0010-rustc_trans-make-.note.rustc-look-more-like-debug-in.patch \
 	file://0001-src-rt-arch-i386-morestack.S-call-rust_stack_exhaust.patch \
 	file://0001-sth-is-pants.patch \
 \

@@ -1,0 +1,167 @@
+From 6478e801dc4bdc5740943dca815c7e62c0c410fb Mon Sep 17 00:00:00 2001
+From: Tyler Hall <tylerwhall@gmail.com>
+Date: Sun, 28 Jun 2015 15:38:29 -0400
+Subject: [PATCH] rustc_trans: make .note.rustc look more like debug info
+
+Mark the global variable as const and private so the resulting section
+is not flagged as writable and to avoid putting an unnecessary symbol in
+the dynamic table of shared objects.
+
+Unfortunately there doesn't seem to be a way to avoid the section being
+marked SHF_ALLOC when declared as a variable in LLVM. Hack around that
+by using objcopy to clear the flags on the section before the final
+link.
+
+This places the section at the end of the executable so it can be
+stripped later without rearranging important code/data sections.
+---
+ mk/cfg/arm-unknown-linux-gnueabi.mk   |  1 +
+ mk/cfg/arm-unknown-linux-gnueabihf.mk |  1 +
+ mk/cfg/i686-unknown-linux-gnu.mk      |  1 +
+ mk/cfg/x86_64-unknown-linux-gnu.mk    |  1 +
+ mk/platform.mk                        |  1 +
+ src/librustc/session/config.rs        |  2 ++
+ src/librustc_trans/back/link.rs       | 32 +++++++++++++++++++++++++++++++-
+ src/librustc_trans/trans/base.rs      |  3 +++
+ 8 files changed, 41 insertions(+), 1 deletion(-)
+
+diff --git a/mk/cfg/arm-unknown-linux-gnueabi.mk b/mk/cfg/arm-unknown-linux-gnueabi.mk
+index b4c604b..a42add3 100644
+--- a/mk/cfg/arm-unknown-linux-gnueabi.mk
++++ b/mk/cfg/arm-unknown-linux-gnueabi.mk
+@@ -4,6 +4,7 @@ CC_arm-unknown-linux-gnueabi=gcc
+ CXX_arm-unknown-linux-gnueabi=g++
+ CPP_arm-unknown-linux-gnueabi=gcc -E
+ AR_arm-unknown-linux-gnueabi=ar
++OBJCOPY_arm-unknown-linux-gnueabi=objcopy
+ CFG_LIB_NAME_arm-unknown-linux-gnueabi=lib$(1).so
+ CFG_STATIC_LIB_NAME_arm-unknown-linux-gnueabi=lib$(1).a
+ CFG_LIB_GLOB_arm-unknown-linux-gnueabi=lib$(1)-*.so
+diff --git a/mk/cfg/arm-unknown-linux-gnueabihf.mk b/mk/cfg/arm-unknown-linux-gnueabihf.mk
+index 4f02de0..925977a 100644
+--- a/mk/cfg/arm-unknown-linux-gnueabihf.mk
++++ b/mk/cfg/arm-unknown-linux-gnueabihf.mk
+@@ -4,6 +4,7 @@ CC_arm-unknown-linux-gnueabihf=gcc
+ CXX_arm-unknown-linux-gnueabihf=g++
+ CPP_arm-unknown-linux-gnueabihf=gcc -E
+ AR_arm-unknown-linux-gnueabihf=ar
++OBJCOPY_arm-unknown-linux-gnueabihf=objcopy
+ CFG_LIB_NAME_arm-unknown-linux-gnueabihf=lib$(1).so
+ CFG_STATIC_LIB_NAME_arm-unknown-linux-gnueabihf=lib$(1).a
+ CFG_LIB_GLOB_arm-unknown-linux-gnueabihf=lib$(1)-*.so
+diff --git a/mk/cfg/i686-unknown-linux-gnu.mk b/mk/cfg/i686-unknown-linux-gnu.mk
+index 1cc9c14..b98be2a 100644
+--- a/mk/cfg/i686-unknown-linux-gnu.mk
++++ b/mk/cfg/i686-unknown-linux-gnu.mk
+@@ -3,6 +3,7 @@ CC_i686-unknown-linux-gnu=$(CC)
+ CXX_i686-unknown-linux-gnu=$(CXX)
+ CPP_i686-unknown-linux-gnu=$(CPP)
+ AR_i686-unknown-linux-gnu=$(AR)
++OBJCOPY_i686-unknown-linux-gnu=$(OBJCOPY)
+ CFG_LIB_NAME_i686-unknown-linux-gnu=lib$(1).so
+ CFG_STATIC_LIB_NAME_i686-unknown-linux-gnu=lib$(1).a
+ CFG_LIB_GLOB_i686-unknown-linux-gnu=lib$(1)-*.so
+diff --git a/mk/cfg/x86_64-unknown-linux-gnu.mk b/mk/cfg/x86_64-unknown-linux-gnu.mk
+index e586609..f0df0e6 100644
+--- a/mk/cfg/x86_64-unknown-linux-gnu.mk
++++ b/mk/cfg/x86_64-unknown-linux-gnu.mk
+@@ -3,6 +3,7 @@ CC_x86_64-unknown-linux-gnu=$(CC)
+ CXX_x86_64-unknown-linux-gnu=$(CXX)
+ CPP_x86_64-unknown-linux-gnu=$(CPP)
+ AR_x86_64-unknown-linux-gnu=$(AR)
++OBJCOPY_x86_64-unknown-linux-gnu=$(OBJCOPY)
+ CFG_LIB_NAME_x86_64-unknown-linux-gnu=lib$(1).so
+ CFG_STATIC_LIB_NAME_x86_64-unknown-linux-gnu=lib$(1).a
+ CFG_LIB_GLOB_x86_64-unknown-linux-gnu=lib$(1)-*.so
+diff --git a/mk/platform.mk b/mk/platform.mk
+index cd86b27..946c3b2 100644
+--- a/mk/platform.mk
++++ b/mk/platform.mk
+@@ -149,6 +149,7 @@ define CFG_MAKE_TOOLCHAIN
+        CPP_$(1)=$(CROSS_PREFIX_$(1))$(CPP_$(1))
+        AR_$(1)=$(CROSS_PREFIX_$(1))$(AR_$(1))
+        RUSTC_CROSS_FLAGS_$(1)=-C linker=$$(call FIND_COMPILER,$$(CC_$(1))) \
++           -C objcopy=$$(call FIND_COMPILER,$$(OBJCOPY_$(1))) \
+            -C ar=$$(call FIND_COMPILER,$$(AR_$(1))) $(RUSTC_CROSS_FLAGS_$(1))
+ 
+        RUSTC_FLAGS_$(1)=$$(RUSTC_CROSS_FLAGS_$(1)) $(RUSTC_FLAGS_$(1))
+diff --git a/src/librustc/session/config.rs b/src/librustc/session/config.rs
+index 3fb6c19..a61334d 100644
+--- a/src/librustc/session/config.rs
++++ b/src/librustc/session/config.rs
+@@ -478,6 +478,8 @@ options! {CodegenOptions, CodegenSetter, basic_codegen_options,
+          CG_OPTIONS, cg_type_desc, cgsetters,
+     ar: Option<String> = (None, parse_opt_string,
+         "tool to assemble archives with"),
++    objcopy: String = ("objcopy".to_string(), parse_string,
++        "objcopy"),
+     linker: Option<String> = (None, parse_opt_string,
+         "system linker to link outputs with"),
+     link_args: Option<Vec<String>> = (None, parse_opt_list,
+diff --git a/src/librustc_trans/back/link.rs b/src/librustc_trans/back/link.rs
+index b53be98..ee6edc8 100644
+--- a/src/librustc_trans/back/link.rs
++++ b/src/librustc_trans/back/link.rs
+@@ -849,6 +849,33 @@ fn link_natively(sess: &Session, trans: &CrateTranslation, dylib: bool,
+     }
+ }
+ 
++fn fix_meta_section_attributes(sess: &Session, meta_name: &PathBuf) {
++    // First, fix up the note section attributes. We want the SHF_ALLOC and
++    // SHF_WRITE flags to be unset so the section will get placed near the
++    // end along with the debug info. This allows the section to be
++    // stripped later without renumbering important sections that contain
++    // code and data.
++    let mut o_cmd = Command::new(&sess.opts.cg.objcopy);
++    o_cmd.arg("--rename-section")
++         .arg(".note.rustc=.note.rustc,contents,noload,readonly")
++         .arg(&meta_name);
++    // Invoke objcopy
++    info!("{:?}", o_cmd);
++    match o_cmd.status() {
++        Ok(exitstatus) => {
++            if !exitstatus.success() {
++                sess.err(&format!("objcopy failed with exit code {:?}", exitstatus.code()));
++                sess.note(&format!("{:?}", &o_cmd));
++            }
++        },
++        Err(exitstatus) => {
++            sess.err(&format!("objcopy failed: {}", exitstatus));
++            sess.note(&format!("{:?}", &o_cmd));
++        }
++    }
++    sess.abort_if_errors();
++}
++
+ fn link_args(cmd: &mut Command,
+              sess: &Session,
+              dylib: bool,
+@@ -901,7 +928,10 @@ fn link_args(cmd: &mut Command,
+     // executable. This metadata is in a separate object file from the main
+     // object file, so we link that in here.
+     if dylib {
+-        cmd.arg(&obj_filename.with_extension("metadata.o"));
++        let meta_name = obj_filename.with_extension("metadata.o");
++
++        fix_meta_section_attributes(sess, &meta_name);
++        cmd.arg(&meta_name);
+     }
+ 
+     if t.options.is_like_osx {
+diff --git a/src/librustc_trans/trans/base.rs b/src/librustc_trans/trans/base.rs
+index 023f9e0..1608645 100644
+--- a/src/librustc_trans/trans/base.rs
++++ b/src/librustc_trans/trans/base.rs
+@@ -2520,6 +2520,9 @@ pub fn write_metadata(cx: &SharedCrateContext, krate: &ast::Crate) -> Vec<u8> {
+     };
+     unsafe {
+         llvm::LLVMSetInitializer(llglobal, llconst);
++        llvm::LLVMSetGlobalConstant(llglobal, llvm::True);
++        llvm::LLVMSetUnnamedAddr(llglobal, llvm::True);
++        llvm::SetLinkage(llglobal, llvm::Linkage::PrivateLinkage);
+         let name = loader::meta_section_name(cx.sess().target.target.options.is_like_osx);
+         let name = CString::new(name).unwrap();
+         llvm::LLVMSetSection(llglobal, name.as_ptr())
+-- 
+2.4.4
+
