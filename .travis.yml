@@ -1,0 +1,14 @@
+lanuage: c++
+compiler: gcc
+sudo: required
+dist: trusty
+addons:
+    apt:
+        packages:
+            diffstat
+            texinfo
+            chrpath
+            python3
+script:
+    - ./scripts/travis-setup.sh
+    - travis_wait 90 ./scripts/run-bitbake.sh rustfmt rust-hello-world
